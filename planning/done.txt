@@ -1,0 +1,18 @@
+-base de dados mista
+-treinamento de diferentes políticas na base
+-melhor resultado foi 60% com A2C
+-cyberwheel -- aprendendo a usar
+
+-flower - ainda nao usei
+    duvida: agregar por dispositivo ou agregar por ataque?
+    agregar por dispositivo! Pois todos os dispositivos precisam ser capazes de identificar todos os ataques.
+-rec
+
+26/08
+treinar dois agentes diferentes (com o mesmo modelo)
+    -separar duas bases de dados (dois ataques diferentes)
+    -criar um ambiente para cada agente
+    -salvar agentes
+agregar com fedavg (flower)
+analisasr os ambientes github
+

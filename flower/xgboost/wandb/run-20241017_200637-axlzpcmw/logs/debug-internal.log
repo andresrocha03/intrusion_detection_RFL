@@ -1,0 +1,16 @@
+{"time":"2024-10-17T20:06:37.987730232-03:00","level":"INFO","msg":"using version","core version":"0.18.5"}
+{"time":"2024-10-17T20:06:37.987783817-03:00","level":"INFO","msg":"created symlink","path":"/home/andre/unicamp/IC/machine_learning/reinforcement_learning/tabular_data/flower/logistic_regression/wandb/run-20241017_200637-axlzpcmw/logs/debug-core.log"}
+{"time":"2024-10-17T20:06:38.101262131-03:00","level":"INFO","msg":"created new stream","id":"axlzpcmw"}
+{"time":"2024-10-17T20:06:38.101352823-03:00","level":"INFO","msg":"stream: started","id":"axlzpcmw"}
+{"time":"2024-10-17T20:06:38.101732519-03:00","level":"INFO","msg":"sender: started","stream_id":"axlzpcmw"}
+{"time":"2024-10-17T20:06:38.101508156-03:00","level":"INFO","msg":"handler: started","stream_id":{"value":"axlzpcmw"}}
+{"time":"2024-10-17T20:06:38.101460063-03:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"axlzpcmw"}}
+{"time":"2024-10-17T20:06:38.707003758-03:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-10-17T20:06:43.017457584-03:00","level":"INFO","msg":"stream: closing","id":"axlzpcmw"}
+{"time":"2024-10-17T20:06:43.017537949-03:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-10-17T20:06:43.018445018-03:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-10-17T20:06:45.614795874-03:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2024-10-17T20:06:45.872544561-03:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"axlzpcmw"}}
+{"time":"2024-10-17T20:06:45.872692895-03:00","level":"INFO","msg":"sender: closed","stream_id":"axlzpcmw"}
+{"time":"2024-10-17T20:06:45.872679449-03:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"axlzpcmw"}}
+{"time":"2024-10-17T20:06:45.872991465-03:00","level":"INFO","msg":"stream: closed","id":"axlzpcmw"}

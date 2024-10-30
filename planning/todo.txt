@@ -1,0 +1,22 @@
+Pre-processing:
+        balancear o conjunto de dados (tirar dados acima do x) - done
+        validation > training - done
+
+RL:
+        Precision e Recall e Tempo de treinamento do RL - ok
+
+Classificacao:
+        rodar mlp junto com os classificadores
+        ataques diferentes dos presentes no treino 
+
+fazer tudo dnv (rodar para unique_atack e split_attack)
+        rodar classificacao
+        rodar ataques juntos (todos os ataques identificados como 1) e separados (um código para cada ataque)
+        ataques surpresa: com todos os ataques e com somente parte dos ataques
+        comparar e avaliar
+
+
+
+Usar xgboost
+Federar usando flower
+wandb
