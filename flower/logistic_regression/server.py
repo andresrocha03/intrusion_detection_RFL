@@ -1,3 +1,4 @@
+import os
 from typing import Dict
 import argparse
 import flwr as fl
@@ -17,31 +18,30 @@ def fit_round(server_round: int) -> Dict:
     """Send round number to client."""
     return {"server_round": server_round}
 
+
 def get_evaluate_fn(model: LogisticRegression, num_clients:int, test_split=0.2, random_seed=42):
     """Return an evaluation function for server-side evaluation."""
 
-    
     # Load test data here to avoid the overhead of doing it in `evaluate` itself
     _, X_test, _, y_test = utils.load_data(df, random_seed=42, test_split=0.2)
-    
+
     # The `evaluate` function will be called after every round
-    def evaluate(parameters: fl.common.NDArrays, config):
+    def evaluate(server_round, parameters: fl.common.NDArrays, config):
+        results_directory = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/plots/fed' 
+        results_file = os.path.join(results_directory, 'results.csv')
+        results = pd.read_csv(results_file)
+
         # Update model with th[e latest parameters
         utils.set_model_params(model, parameters)
         y_pred = model.predict(X_test)
         loss = log_loss(y_test, model.predict_proba(X_test))
         scores = utils.get_scores(y_test, y_pred)
-        scores["loss"] = loss
-        # wandb.log(scores)
-        # print("OIOIOIOIOIIOI")
-        print(f"Server accuracy: {scores['accuracy']}")        
-        
-        # if server_round == 5 or server_round == 10: 
-        #     feature_importances = model.coef_[0]
-        #     # Print feature importances for the central model.
-        #     for feature, importance in zip(X_test.columns, feature_importances):
-        #         print(f"\n {feature}: {importance}")
-        
+        model_info = {'Model Name': 'Logistic Regression', 'Loss': loss, 'Accuracy': scores['accuracy']}
+        new_row = pd.DataFrame([model_info])
+        results = pd.concat([results, new_row], ignore_index=True)
+        results.to_csv(results_file, index=False)
+       
+        print(f"\nServer accuracy: {scores['accuracy']}")         
         return loss, {"accuracy": scores["accuracy"]}
 
     return evaluate
@@ -64,31 +64,25 @@ if __name__ == "__main__":
     model = LogisticRegression()
     model = utils.set_initial_params(model)
 
-    # wandb.init(
-    #     # set the wandb project where this run will be logged
-    #     project="federated_learning_ids",
-    #     # track hyperparameters and run metadata
-    #     config={
-    #         "model": "Logistic Regression",
-    #         "dataset": "Intrusion Detection System",
-    #         "epochs": 3,
-    #         "n_features": 15,
-    #         "test_split":  0.2,
-    #         "num_clients": num_clients,         
-    #         "num_rounds": 3,
-    #     },
-    # )
-
-
     #define the strategy
     strategy = fl.server.strategy.FedAvg(
         min_available_clients=2,
-        evaluate_fn=get_evaluate_fn( model, random_seed=42, test_split=0.2, num_clients=num_clients),
+        evaluate_fn=get_evaluate_fn(model,  num_clients=num_clients),
         on_fit_config_fn=fit_round,
         )
 
     #start the server
     fl.server.start_server(
         server_address="0.0.0.0:8080",  # Listening on all interfaces, port 8080
-        config=fl.server.ServerConfig(num_rounds=10),  # Number of training rounds
+        config=fl.server.ServerConfig(num_rounds=3),  # Number of training rounds
+        strategy=strategy,
     )
+
+    
+ 
+    # model_info = {
+    #     'Model Name': row['algoritmos'],
+    #     'Loss': row['log_loss'],
+    #     'Accuracy': row['accuracy'],
+
+    # }

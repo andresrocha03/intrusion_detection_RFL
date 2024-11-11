@@ -4,7 +4,8 @@ import flwr as fl
 import numpy as np
 import pandas as pd
 import utils
-# import wandb
+from tabularenv_train import TabularEnv
+from stable_baselines3 import DQN
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 
 
@@ -15,18 +16,6 @@ df = pd.read_csv("x_one_complete.csv")
 def fit_round(server_round: int) -> Dict:
     """Send round number to client."""
     return {"server_round": server_round}
-
-
-
-# # Define metric aggregation function
-# def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-#     # Multiply accuracy of each client by number of examples used
-#     accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
-#     examples = [num_examples for num_examples, _ in metrics]
-
-#     # Aggregate and return custom metric (weighted average)
-#     return {"accuracy": sum(accuracies) / sum(examples)}
-
 
 
 if __name__ == "__main__":
@@ -42,10 +31,14 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     num_clients = args.num_clients
-    
-    parameters = ndarrays_to_parameters(utils.load_model().get_weights())
-    print(parameters)
 
+ 
+    X_train, X_test, y_train, y_test = utils.load_data(df, random_seed=42, test_split=0.2)
+    env = TabularEnv((X_train, y_train), row_per_episode=1, random=False)
+    model = DQN("MlpPolicy", env)
+
+    parameters = ndarrays_to_parameters(utils.get_weights(model))
+    
     #define the strategy
     strategy = fl.server.strategy.FedAvg(
         min_available_clients=2,

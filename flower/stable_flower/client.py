@@ -17,7 +17,6 @@ warnings.filterwarnings("ignore")
 df = pd.read_csv("x_one_complete.csv")
 
 
-
 # Define Flower Client
 class SimpleClient(NumPyClient):
     def __init__(self, env, X_train, y_train, X_test, y_test):
@@ -26,26 +25,28 @@ class SimpleClient(NumPyClient):
         self.x_train, self.y_train, self.x_test, self.y_test = X_train, y_train, X_test, y_test
     
     def get_parameters(self, config):
-        return self.model.get_parameters()
+        return utils.get_weights(self.model)
 
     def fit(self, parameters, config):
         """Train the model with data of this client."""
-        self.model.set_parameters(parameters)
+        utils.set_weights(self.model, parameters)
         self.model.learn(total_timesteps=1000, reset_num_timesteps=False)
-        return self.model.get_parameters(), len(self.x_train) , {}
+        return utils.get_weights(self.model), len(self.x_train) , {}
 
     def evaluate(self, parameters, config):
         """Evaluate the model on the data this client has."""
-        self.model.set_parameters(parameters)
-        mean_reward, std_reward = evaluate_policy(self.model, self.model.get_env(), n_eval_episodes=1000)
-        return mean_reward, len(self.x_test), {"accuracy": std_reward}
-
+        utils.set_weights(self.model, parameters)
+        # mean_reward, std_reward = evaluate_policy(self.model, self.model.get_env(), n_eval_episodes=1000)
+        predictions = self.model.predict(self.x_test)
+        loss = log_loss(self.y_test, predictions)
+        accuracy = (predictions == self.y_test).mean()
+        return loss, len(self.x_test), {"accuracy": accuracy}
 
 def create_client(cid: str):
     #get train and test data
-    env.reset()
     X_train, X_test, y_train, y_test = utils.load_data(partitions[int(cid)-1], random_seed=42, test_split=0.2)
     env = TabularEnv((X_train, y_train), row_per_episode=1, random=False)
+    env.reset()
     return SimpleClient(env, X_train, y_train, X_test, y_test)
 
 if __name__ == "__main__":

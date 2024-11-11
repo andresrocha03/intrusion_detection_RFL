@@ -1,3 +1,4 @@
+import os
 from typing import Dict
 import argparse
 import flwr as fl
@@ -15,12 +16,34 @@ def fit_round(server_round: int) -> Dict:
 
 
 def evaluate_metrics_aggregation(eval_metrics):
-    """Return an aggregated metric (AUC) for evaluation."""
+    """Return an aggregated metric (AUC, Loss) for evaluation."""
+    results_directory = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/plots/fed/one' 
+    results_file = os.path.join(results_directory, 'results.csv')
+    results = pd.read_csv(results_file)
+
+
     total_num = sum([num for num, _ in eval_metrics])
+
+    loss_aggregated = (
+        sum([metrics["Loss"] * num for num, metrics in eval_metrics]) / total_num
+    )
     auc_aggregated = (
         sum([metrics["AUC"] * num for num, metrics in eval_metrics]) / total_num
     )
-    metrics_aggregated = {"AUC": auc_aggregated}
+    acc_aggregated = (
+       sum([metrics["Accuracy"] * num for num, metrics in eval_metrics]) / total_num
+    )
+
+    metrics_aggregated = {"AUC": auc_aggregated,
+                          "Loss": loss_aggregated,
+                          "Accuracy": acc_aggregated}
+    
+    model_info = {'Model Name': 'XGBoost', 
+                  'Loss': loss_aggregated, 'Accuracy': acc_aggregated}
+    new_row = pd.DataFrame([model_info])
+    results = pd.concat([results, new_row], ignore_index=True)
+    results.to_csv(results_file, index=False)
+    
     return metrics_aggregated
 
 

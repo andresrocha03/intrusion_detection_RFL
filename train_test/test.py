@@ -21,6 +21,7 @@ vec_env = model.get_env()
 obs = vec_env.reset()
 inicio = time.time()
 terminated = False
+
 # while (not terminated):
 for _ in range(18000):
     action, _states = model.predict(obs)

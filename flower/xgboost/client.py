@@ -1,16 +1,14 @@
-import pandas as pd
 import warnings
+import pandas as pd
 from sklearn.model_selection import train_test_split
 import numpy as np
 from flwr.client import Client
 import flwr as fl
-from sklearn.metrics import log_loss
+from sklearn.metrics import log_loss, accuracy_score
 import argparse
 import utils
 import xgboost as xgb
 from flwr.common import GetParametersIns, GetParametersRes,Parameters, Status, Code, FitRes,EvaluateIns,EvaluateRes
-from datasets import load_dataset
-from flwr_datasets.partitioner import IidPartitioner
 
 
 
@@ -109,15 +107,23 @@ class SimpleClient(Client):
             iteration=self.model.num_boosted_rounds() - 1,
         )
         auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
-
+        loss = log_loss(self.test.get_label(), self.model.predict(self.test))
+        #convert probabilities to binary
+        
+        predictions = self.model.predict(self.test)
+        predictions = np.where(predictions > 0.5, 1, 0)
+        accuracy = accuracy_score(self.test.get_label(), predictions)
+        
         return EvaluateRes(
             status=Status(
                 code=Code.OK,
                 message="OK",
             ),
-            loss=0.0,
+            loss=loss,
             num_examples=self.num_test,
-            metrics={"AUC": auc},
+            metrics={"Loss": loss,
+                     "AUC": auc,
+                     "Accuracy": accuracy},
         )
 
  

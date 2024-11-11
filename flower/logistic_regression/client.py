@@ -39,7 +39,7 @@ class SimpleClient(fl.client.NumPyClient):
         self.set_parameters(parameters)
         loss = log_loss(self.y_test, model.predict_proba(self.X_test))
         accuracy = model.score(self.X_test, self.y_test)
-        print(f"Client accuracy for client {args.id}: {accuracy} ")
+        # print(f"Client accuracy for client {args.id}: {accuracy} ")
         return loss, len(self.X_test), {"accuracy": accuracy}
 
 

@@ -43,3 +43,5 @@ def load_model(learning_rate=0.001):
         metrics=['accuracy']
     )
     return model
+
+

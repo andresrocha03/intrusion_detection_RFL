@@ -1,4 +1,4 @@
-# Intrusion Detection System using Reinforcement Learning
+# Intrusion Detection System using Reinforcement Federated Learning
 ## train_test
 In this folder, there are the codes responsible for training, testing, and evaluating the models.
 

@@ -1,3 +1,5 @@
+from collections import OrderedDict
+import torch
 from typing import List
 from numpy.typing import NDArray
 import numpy as np
@@ -19,3 +21,14 @@ def load_data(partition: list[NDArray], test_split: float, random_seed=42):
 def partition_data(data, num_partitions):
 # Partitioning the dataset into parts for each client
     return np.array_split(data, num_partitions)
+
+def get_weights(model):
+    model_weights = {}
+    for key, state_dict in model.get_parameters().items():
+        model_weights[key] = {param_key: param_val.cpu().numpy() for param_key, param_val in state_dict.items()}
+    return model_weights
+
+def set_weights(model, parameters):
+    params_dict = zip(model.get_parameters.keys(), parameters)
+    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+    model.set_parameters(state_dict, strict=True)
