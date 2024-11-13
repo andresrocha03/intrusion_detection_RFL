@@ -1,22 +1,5 @@
-Pre-processing:
-        balancear o conjunto de dados (tirar dados acima do x) - done
-        validation > training - done
-
-RL:
-        Precision e Recall e Tempo de treinamento do RL - ok
-
-Classificacao:
-        rodar mlp junto com os classificadores
-        ataques diferentes dos presentes no treino 
-
-fazer tudo dnv (rodar para unique_atack e split_attack)
-        rodar classificacao
-        rodar ataques juntos (todos os ataques identificados como 1) e separados (um código para cada ataque)
-        ataques surpresa: com todos os ataques e com somente parte dos ataques
-        comparar e avaliar
+investigar baixa acurácia nos classificadores - classificadores para comparação
+federar com federated dataset - investigar alta acurácia (discrepante do centralizado) nos modelos
+fazer um for pelas chaves do dicionário fazer média para cada uma das listas e retornar no formato correto - FRL 
 
 
-
-Usar xgboost
-Federar usando flower
-wandb

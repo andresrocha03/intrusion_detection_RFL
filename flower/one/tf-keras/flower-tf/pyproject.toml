@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "flower-tf"
+version = "0.1.0"
+description = ""
+authors = ["andresantosr <andresanro03@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+tensorflow = "^2.18.0"
+flwr = "^1.12.0"
+pandas = "^2.2.3"
+scikit-learn = "^1.5.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
