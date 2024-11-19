@@ -8,10 +8,10 @@ import pandas as pd
 
 
 columns = 15
-num_actions = 9
-data_folder = '/home/andre/unicamp/IC/machine_learning/reinforcement_learning/tabular_data/data/processed_data/current_testing'
-path_x = 'x_mul_train.csv'
-path_y = 'y_mul_train.csv'
+num_actions = 2
+data_folder = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/processed_data/current_testing'
+path_x = 'x_one_train.csv'
+path_y = 'y_one_train.csv'
 train_x = pd.read_csv(os.path.join(data_folder,path_x))
 train_y = pd.read_csv(os.path.join(data_folder,path_y))
 df_train_x = np.array(train_x).astype(np.float32)

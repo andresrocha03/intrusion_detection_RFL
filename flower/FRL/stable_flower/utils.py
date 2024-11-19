@@ -24,13 +24,12 @@ def partition_data(data, num_partitions):
 
 def get_weights(model):
     model_weights = {}
-    print(model.get_parameters())
-    for key, state_dict in model.get_parameters().items():
-        print(f"key {key}")
-        
-    return model_weights
+    model_weights = model.get_parameters()['policy']
+    print(model.get_parameters()['policy.optimizer'])
+    return [val.cpu().numpy() for _, val in model_weights.items()]
+
 
 def set_weights(model, parameters):
-    params_dict = zip(model.get_parameters.keys(), parameters)
+    params_dict = zip(net.state_dict().keys(), parameters)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-    model.set_parameters(state_dict, strict=True)
+    net.load_state_dict(state_dict, strict=True)
