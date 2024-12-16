@@ -36,7 +36,17 @@ class SimpleClient(NumPyClient):
         """Evaluate the model on the data this client has."""
         utils.set_weights(self.model, parameters)
         # mean_reward, std_reward = evaluate_policy(self.model, self.model.get_env(), n_eval_episodes=1000)
-        predictions = self.model.predict(self.x_test)
+        vec_env = self.model.get_env()
+        obs = vec_env.reset()
+        predictions = []
+        attempts, correct = 0, 0      
+        for i in range(self.x_test.shape[0]):
+            action, _states = self.model.predict(obs)
+            predictions.append(action[0])
+            obs, rewards, dones, info = vec_env.step(action)
+            attempts += 1
+            if rewards > 0:
+                correct += 1
         loss = log_loss(self.y_test, predictions)
         accuracy = (predictions == self.y_test).mean()
         return loss, len(self.x_test), {"accuracy": accuracy}

@@ -33,17 +33,17 @@ if __name__ == "__main__":
     num_clients = args.num_clients
 
  
-    X_train, X_test, y_train, y_test = utils.load_data(df, random_seed=42, test_split=0.2)
-    env = TabularEnv((X_train, y_train), row_per_episode=1, random=False)
-    model = DQN("MlpPolicy", env)
+    # X_train, X_test, y_train, y_test = utils.load_data(df, random_seed=42, test_split=0.2)
+    # env = TabularEnv((X_train, y_train), row_per_episode=1, random=False)
+    # model = DQN("MlpPolicy", env)
 
-    parameters = ndarrays_to_parameters(utils.get_weights(model))
+    # parameters = ndarrays_to_parameters(utils.get_weights(model))
     
     #define the strategy
     strategy = fl.server.strategy.FedAvg(
         min_available_clients=2,
         on_fit_config_fn=fit_round,
-        initial_parameters=parameters,
+        # initial_parameters=parameters,
         # evaluate_metrics_aggregation_fn=weighted_average,
         )
 
