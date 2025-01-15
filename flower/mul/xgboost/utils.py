@@ -8,17 +8,12 @@ import xgboost as xgb
 
 
 
-def load_data(partition: list[NDArray], test_split: float, random_seed=42):
+def load_data(partition: list[NDArray]):
     """Load data."""
     X = partition.drop('label', axis=1).values
     y = partition['label'].values
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_split, random_state=random_seed)
-    num_train = len(X_train)
-    num_test = len(X_test)
-    train = xgb.DMatrix(X_train, label=y_train)
-    test = xgb.DMatrix(X_test, label=y_test)
-    return train, test, num_train, num_test 
+    data = xgb.DMatrix(X, label=y)
+    return data, len(X) 
 
 def partition_data(data, num_partitions):
 # Partitioning the dataset into parts for each client

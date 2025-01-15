@@ -4,10 +4,10 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 from flwr.client import NumPyClient
 import flwr as fl
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 import argparse
 import utils
+import tensorflow as tf
 
 warnings.filterwarnings("ignore")
 
@@ -20,37 +20,48 @@ df_test = pd.read_csv("x_mul_test.csv")
 label_test = pd.read_csv("y_mul_test.csv")
 df_test['label'] = label_test
 
-
-class SimpleClient(fl.client.NumPyClient):
-    def __init__(self, X_train, y_train, X_test, y_test):
-        self.X_train, self.y_train = X_train, y_train
-        self.X_test, self.y_test = X_test, y_test
-        self.model = LogisticRegression(warm_start=True, solver="saga", max_iter=100)
-        # Setting initial parameters, akin to model.compile for keras models
-        utils.set_initial_params(self.model)
-
+# Define Flower Client
+class SimpleClient(NumPyClient):
+    def __init__(
+        self,
+        X_train,
+        y_train,
+        X_test,
+        y_test,
+        epochs=30,
+        batch_size=128,
+        verbose=0,
+    ):
+        self.model = utils.load_model()
+        self.x_train, self.y_train, self.x_test, self.y_test = X_train, y_train, X_test, y_test
+        self.epochs = epochs
+        self.batch_size = batch_size
+        self.verbose = verbose
     def get_parameters(self, config):
-        return utils.get_model_parameters(self.model)
-    
-    def set_parameters(self, parameters):
-       utils.set_model_params(self.model, parameters)
+        return self.model.get_weights()
 
     def fit(self, parameters, config):
-        self.set_parameters(parameters)
-        self.model.fit(self.X_train, self.y_train)
-            
-        return utils.get_model_parameters(self.model), len(self.X_train), {}
+        """Train the model with data of this client."""
+        self.model.set_weights(parameters)
+        self.model.fit(
+            self.x_train,
+            self.y_train,
+            epochs=self.epochs,
+            batch_size=self.batch_size,
+            verbose=self.verbose,
+        )
+        return self.model.get_weights(), len(self.x_train), {}
 
     def evaluate(self, parameters, config):
-        self.set_parameters(parameters)
-        loss = log_loss(self.y_test, self.model.predict_proba(self.X_test))
-        accuracy = self.model.score(self.X_test, self.y_test)
-        return loss, len(self.X_test), {"loss": loss, "accuracy": accuracy}
+        """Evaluate the model on the data this client has."""
+        self.model.set_weights(parameters)
+        loss, accuracy = self.model.evaluate(self.x_test, self.y_test, verbose=0)
+        return loss, len(self.x_test), {"loss": loss, "accuracy": accuracy}
 
 
 def create_client(cid: str):
     #get train and test data
-    X_train,  y_train = utils.load_data(train_partitions[int(cid)-1])
+    X_train, y_train = utils.load_data(train_partitions[int(cid)-1])
     X_test, y_test = utils.load_data(test_partitions[int(cid)-1])
     return SimpleClient(X_train, y_train, X_test, y_test)
 

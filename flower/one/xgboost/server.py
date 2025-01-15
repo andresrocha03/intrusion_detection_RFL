@@ -18,7 +18,7 @@ def fit_round(server_round: int) -> Dict:
 def evaluate_metrics_aggregation(eval_metrics):
     """Return an aggregated metric (AUC, Loss) for evaluation."""
     results_directory = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/plots/fed/one' 
-    results_file = os.path.join(results_directory, 'results.csv')
+    results_file = os.path.join(results_directory, 'xgb_res.csv')
     results = pd.read_csv(results_file)
 
 
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     #start the server
     fl.server.start_server(
         server_address="0.0.0.0:8080",  # Listening on all interfaces, port 8080
-        config=fl.server.ServerConfig(num_rounds=3),  # Number of training rounds
+        config=fl.server.ServerConfig(num_rounds=10),  # Number of training rounds
         strategy=strategy,
     )
 

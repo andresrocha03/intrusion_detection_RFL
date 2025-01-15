@@ -16,13 +16,15 @@ warnings.filterwarnings("ignore")
 
 
 # Load your dataset
-df = pd.read_csv("x_mul_complete.csv")
+df_train = pd.read_csv("x_mul_train.csv")
+label_train = pd.read_csv("y_mul_train.csv")
+df_train['label'] = label_train
 
-
-model = xgb.XGBClassifier()
+df_test = pd.read_csv("x_mul_test.csv")
+label_test = pd.read_csv("y_mul_test.csv")
+df_test['label'] = label_test
 
 # Setting initial parameters, akin to model.compile for keras models
-
 num_local_round = 1
 params = {
     "objective": "multi:softprob",
@@ -35,7 +37,6 @@ params = {
     "subsample": 1,
     "tree_method": "hist",
 }
-
 
 class SimpleClient(Client):
     def __init__(self, train, test,num_train,num_test,num_local_round,params):
@@ -131,7 +132,8 @@ class SimpleClient(Client):
 
 def create_client(cid: str):
     #get train and test data
-    train, test, num_train, num_test = utils.load_data(partitions[int(cid)-1], random_seed=42, test_split=0.2)
+    train, num_train = utils.load_data(train_partitions[int(cid)-1])
+    test, num_test = utils.load_data(test_partitions[int(cid)-1])
     return SimpleClient(train, test, num_train, num_test, num_local_round, params)
 
 
@@ -148,7 +150,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # partition the data
-    partitions = utils.partition_data(df, args.num_clients)    
+    train_partitions = utils.partition_data(df_train, args.num_clients)    
+    test_partitions = utils.partition_data(df_test, args.num_clients)    
    
     # Assuming the partitioner is already set up elsewhere and loaded here
     fl.client.start_client(server_address="0.0.0.0:8080", client=create_client(args.id))

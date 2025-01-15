@@ -18,7 +18,7 @@ def fit_round(server_round: int) -> Dict:
 def evaluate_metrics_aggregation(eval_metrics):
     """Return an aggregated metric (AUC, Loss) for evaluation."""
     results_directory = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/plots/fed/mul' 
-    results_file = os.path.join(results_directory, 'xgb_results.csv')
+    results_file = os.path.join(results_directory, 'xgb_res.csv')
     results = pd.read_csv(results_file)
 
 

@@ -11,7 +11,10 @@ from typing import List, Tuple
 from flwr.common import Context, Metrics
 
 # Load your dataset
-df = pd.read_csv("x_mul_complete.csv")
+df = pd.read_csv("x_mul_test.csv")
+label_test = pd.read_csv("y_mul_test.csv")
+df['label'] = label_test
+
 
 def fit_round(server_round: int) -> Dict:
     """Send round number to client."""
@@ -21,7 +24,7 @@ def get_evaluate_fn(model: LogisticRegression, num_clients:int, test_split=0.2, 
     """Return an evaluation function for server-side evaluation."""
 
     # Load test data here to avoid the overhead of doing it in `evaluate` itself
-    _, X_test, _, y_test = utils.load_data(df, random_seed=42, test_split=0.2)
+    X_test, y_test = utils.load_data(df)
 
     # The `evaluate` function will be called after every round
     def evaluate(server_round, parameters: fl.common.NDArrays, config):
@@ -41,9 +44,10 @@ def get_evaluate_fn(model: LogisticRegression, num_clients:int, test_split=0.2, 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     # Multiply accuracy of each client by number of examples used
     results_directory = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/plots/fed/mul' 
-    results_file = os.path.join(results_directory, "log_reg_results.csv")
+    results_file = os.path.join(results_directory, "log_reg_res.csv")
     results = pd.read_csv(results_file)
     
+    print(metrics)
 
     accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
     examples = [num_examples for num_examples, _ in metrics]
@@ -99,12 +103,3 @@ if __name__ == "__main__":
         config=fl.server.ServerConfig(num_rounds=10),  # Number of training rounds
         strategy=strategy,
     )
-
-    
- 
-    # model_info = {
-    #     'Model Name': row['algoritmos'],
-    #     'Loss': row['log_loss'],
-    #     'Accuracy': row['accuracy'],
-
-    # }
