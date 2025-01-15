@@ -1,3 +1,4 @@
+20/08
 -base de dados mista
 -treinamento de diferentes políticas na base
 -melhor resultado foi 60% com A2C
@@ -15,4 +16,9 @@ treinar dois agentes diferentes (com o mesmo modelo)
     -salvar agentes
 agregar com fedavg (flower)
 analisasr os ambientes github
+
+21/12
+classificadores federados e dqn federada
+dqn federada usando stable-baselines + flwoer, porem stable baselines esta dando muito trabalho, acredito que implementar a dqn na mao tera melhor resultados
+
 

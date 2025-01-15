@@ -1,5 +1,2 @@
 investigar baixa acurácia nos classificadores - classificadores para comparação
 federar com federated dataset - investigar alta acurácia (discrepante do centralizado) nos modelos
-fazer um for pelas chaves do dicionário fazer média para cada uma das listas e retornar no formato correto - FRL 
-
-
