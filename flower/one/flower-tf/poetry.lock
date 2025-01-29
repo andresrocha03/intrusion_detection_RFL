@@ -516,13 +516,13 @@ files = [
 
 [[package]]
 name = "keras"
-version = "3.6.0"
-description = "Multi-backend Keras."
+version = "3.8.0"
+description = "Multi-backend Keras"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "keras-3.6.0-py3-none-any.whl", hash = "sha256:49585e4577f6e86bd890d96dfbcb1890f5bab5967ef831c07fd63f9d86e4bfe9"},
-    {file = "keras-3.6.0.tar.gz", hash = "sha256:405727525a3522ed8f9ec0b46e0667e4c65fcf714a067322c16a00d902ded41d"},
+    {file = "keras-3.8.0-py3-none-any.whl", hash = "sha256:b65d125976b0f8bf8ad1e93311a98e7dfb334ff6023627a59a52b35499165ec3"},
+    {file = "keras-3.8.0.tar.gz", hash = "sha256:6289006e6f6cb2b68a563b58cf8ae5a45569449c5a791df6b2f54c1877f3f344"},
 ]
 
 [package.dependencies]
@@ -1621,4 +1621,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "1913e2cefabbf86a17f2d1589c1c5804c175ec6538c17e9d7bb32929f6e0d743"
+content-hash = "33a4683e41915c030ef8a2f69691391aa2a4039a2f7cc97bab91850b83c63ae0"

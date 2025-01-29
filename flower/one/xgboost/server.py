@@ -8,6 +8,7 @@ import utils
 from sklearn.metrics import log_loss
 import wandb
 from flwr.server.strategy import FedXgbBagging
+from flwr.common import Parameters
 
 
 def fit_round(server_round: int) -> Dict:
@@ -17,7 +18,7 @@ def fit_round(server_round: int) -> Dict:
 
 def evaluate_metrics_aggregation(eval_metrics):
     """Return an aggregated metric (AUC, Loss) for evaluation."""
-    results_directory = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/plots/fed/one' 
+    results_directory = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/results/fed/one' 
     results_file = os.path.join(results_directory, 'xgb_res.csv')
     results = pd.read_csv(results_file)
 
@@ -59,14 +60,29 @@ if __name__ == "__main__":
         required=True,
         help="Specifies how many clients the bash script will start.",
     )
+    parser.add_argument(
+        "--num_rounds",
+        type=int,
+        default=2,
+        choices=range(1, 100),
+        required=True,
+        help="Specifies how many rounds.",
+    )
     args = parser.parse_args()
     num_clients = args.num_clients
+    print(f"NUM ROUNDS {args.num_rounds}")
+    num_rounds = args.num_rounds
+
+
+    # Define parameters
+    # parameters = Parameters(tensor_type="", tensors=[])
 
     # Define strategy
     strategy = FedXgbBagging(
         evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation,
         min_available_clients=num_clients,
         min_fit_clients=num_clients,
+        # initial_parameters=parameters,
     )
 
     #start the server

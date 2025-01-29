@@ -16,7 +16,7 @@ def fit_round(server_round: int) -> Dict:
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     # Multiply accuracy of each client by number of examples used
-    results_directory = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/plots/fed/one' 
+    results_directory = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/results/fed/one' 
     results_file = os.path.join(results_directory, 'dqn_res.csv')
     results = pd.read_csv(results_file)
     
@@ -64,6 +64,6 @@ if __name__ == "__main__":
     #start the server
     fl.server.start_server(
         server_address="0.0.0.0:8080",  # Listening on all interfaces, port 8080
-        config=fl.server.ServerConfig(num_rounds=10),  # Number of training rounds
+        config=fl.server.ServerConfig(num_rounds=5),  # Number of training rounds
         strategy=strategy
     )

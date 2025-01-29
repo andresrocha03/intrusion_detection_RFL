@@ -12,12 +12,8 @@ import tensorflow as tf
 warnings.filterwarnings("ignore")
 
 # Load your dataset
-df_train = pd.read_csv("x_one_train.csv")
-label_train = pd.read_csv("y_one_train.csv")
-df_train['label'] = label_train
-df_test = pd.read_csv("x_one_test.csv")
-label_test = pd.read_csv("y_one_test.csv")
-df_test['label'] = label_test
+data_folder = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/processed_data/new_try'
+df_train, df_test = utils.load_dataset(data_folder)
 
 # Define Flower Client
 class SimpleClient(NumPyClient):
@@ -27,8 +23,8 @@ class SimpleClient(NumPyClient):
         y_train,
         X_test,
         y_test,
-        epochs=30,
-        batch_size=128,
+        epochs=1,
+        batch_size=64,
         verbose=0,
     ):
         self.model = utils.load_model()

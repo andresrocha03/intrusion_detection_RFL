@@ -12,9 +12,8 @@ from flwr.common import Context, Metrics
 
 
 # Load your dataset
-df = pd.read_csv("x_one_test.csv")
-label_test = pd.read_csv("y_one_test.csv")
-df['label'] = label_test
+data_folder = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/processed_data/new_try'
+df_train, df_test = utils.load_dataset(data_folder)
 
 def fit_round(server_round: int) -> Dict:
     """Send round number to client."""
@@ -25,7 +24,7 @@ def get_evaluate_fn(model: LogisticRegression, num_clients:int, test_split=0.2, 
     """Return an evaluation function for server-side evaluation."""
 
     # Load test data here to avoid the overhead of doing it in `evaluate` itself
-    X, y = utils.load_test(df)
+    X, y = utils.load_test(df_test)
 
     # The `evaluate` function will be called after every round
     def evaluate(server_round, parameters: fl.common.NDArrays, config):
@@ -45,7 +44,7 @@ def get_evaluate_fn(model: LogisticRegression, num_clients:int, test_split=0.2, 
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     # Multiply accuracy of each client by number of examples used
-    results_directory = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/plots/fed/one' 
+    results_directory = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/results/fed/one' 
     results_file = os.path.join(results_directory, 'log_reg_res.csv')
     results = pd.read_csv(results_file)
     
@@ -78,7 +77,7 @@ if __name__ == "__main__":
         "--num_clients",
         type=int,
         default=5,
-        choices=range(1, 11),
+        choices=range(1, 31),
         required=True,
         help="Specifies how many clients the bash script will start.",
     )
@@ -93,7 +92,7 @@ if __name__ == "__main__":
     strategy = fl.server.strategy.FedAvg(
         evaluate_metrics_aggregation_fn=weighted_average,
         min_available_clients=2,
-        evaluate_fn=get_evaluate_fn(model,  num_clients=num_clients),
+        # evaluate_fn=get_evaluate_fn(model,  num_clients=num_clients),
         on_fit_config_fn=fit_round,
         )
 
