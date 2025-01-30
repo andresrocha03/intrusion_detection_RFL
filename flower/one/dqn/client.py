@@ -12,7 +12,7 @@ import utils
 from stable_baselines3 import DQN
 import gymnasium as gym
 from tabularenv import TabularEnv
-
+import numpy as np
 
 warnings.filterwarnings("ignore")
 
@@ -25,7 +25,7 @@ class SimpleClient(NumPyClient):
     def __init__(self, cid, env_train, env_test, X_train, y_train, X_test, y_test):
         self.model_train = DQN("MlpPolicy", env_train)
         self.env_train = env_train
-
+       
         self.model_test = DQN("MlpPolicy", env_test)
         self.env_test = env_test
         
@@ -37,34 +37,40 @@ class SimpleClient(NumPyClient):
 
     def fit(self, parameters, config):
         """Train the model with data of this client."""
-        print(f"Training model for client {self.client_id} len of data: {len(self.x_train)}")   
-        self.model_train = utils.set_weights(self.model_train, parameters)
-        self.model_train.learn(total_timesteps=len(self.x_train), reset_num_timesteps=False, progress_bar=True)
+
+        utils.set_weights(self.model_train, parameters)
+        
+        print(f"before training client {self.client_id}: {self.env_train.dataset_idx}")
+        self.model_train.learn(total_timesteps=(0.5*len(self.x_train)), reset_num_timesteps=False, progress_bar=True)        
+        print(f"after training client {self.client_id}: {self.env_train.dataset_idx}")
         print(f"Training model for client {self.client_id} finished")
+        print(self.env_train.info)
+        print("------------------------------------------------------------")
+
         return utils.get_weights(self.model_train), len(self.x_train) , {}
 
     def evaluate(self, parameters, config):
         """Evaluate the model on the data this client has."""
 
-        #salvar loss e reward de cada cliente
+        #carregar modelo global
         utils.set_weights(self.model_train, parameters)
-        
+               
         self.model_test.set_parameters(self.model_train.get_parameters())
-
+                
         obs, info = self.env_test.reset(seed=0)
-        
         predictions = []
 
         for i in range(self.y_test.shape[0]):
-            action, _states = self.model_test.predict(obs)
+            action, _states = self.model_train.predict(obs)
             predictions.append(action)
             obs, rewards, terminated, truncated, info = self.env_test.step(action)
             if terminated:
                 self.env_test.reset()   
-
-        loss = log_loss(self.y_test, predictions)
+        
+        prob_predictions = utils.sigmoid(np.asarray(predictions))
+        loss = log_loss(self.y_test, prob_predictions)
         accuracy = (predictions == self.y_test ).mean()
-        print(f"loss and accuracy for client {self.client_id}: {loss} and {accuracy}\n")
+        print(f"TESTING loss and accuracy for client {self.client_id}: {loss} and {accuracy}\n")
 
         return loss, len(self.x_test), {"loss":loss, "accuracy": accuracy}
 

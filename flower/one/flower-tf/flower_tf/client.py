@@ -32,6 +32,7 @@ class SimpleClient(NumPyClient):
         self.epochs = epochs
         self.batch_size = batch_size
         self.verbose = verbose
+        
     def get_parameters(self, config):
         return self.model.get_weights()
 

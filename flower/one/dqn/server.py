@@ -1,3 +1,8 @@
+import sys
+# sys.path.insert(0, '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/environments')
+
+import os
+# from tabularenv import TabularEnv
 from typing import Dict, List, Tuple
 import argparse
 import flwr as fl
@@ -6,7 +11,7 @@ import pandas as pd
 import utils
 from stable_baselines3 import DQN
 from flwr.common import Context, Metrics, ndarrays_to_parameters
-import os
+
 
 
 def fit_round(server_round: int) -> Dict:
@@ -54,16 +59,28 @@ if __name__ == "__main__":
     args = parser.parse_args()
     num_clients = args.num_clients
     
+    #load env
+        # Load your dataset
+    data_folder = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/processed_data/new_try'
+    # df_train, df_test = utils.load_dataset(data_folder)
+    # X_test, y_test = utils.load_client_data(df_test)
+    # env = TabularEnv(X_test, y_test)
+
+    #initital parameters
+    # parameters = utils.get_weights(DQN("MlpPolicy", env))
+
+
     #define the strategy
     strategy = fl.server.strategy.FedAvg(
         evaluate_metrics_aggregation_fn=weighted_average,
         min_available_clients=2,
         on_fit_config_fn=fit_round,
+        # initial_parameters=parameters,
         )
 
     #start the server
     fl.server.start_server(
         server_address="0.0.0.0:8080",  # Listening on all interfaces, port 8080
-        config=fl.server.ServerConfig(num_rounds=5),  # Number of training rounds
+        config=fl.server.ServerConfig(num_rounds=10),  # Number of training rounds
         strategy=strategy
     )
