@@ -10,42 +10,36 @@ import utils
 import xgboost as xgb
 from flwr.common import GetParametersIns, GetParametersRes,Parameters, Status, Code, FitRes,EvaluateIns,EvaluateRes
 
-
-
 warnings.filterwarnings("ignore")
 
 
-# Load your dataset
-df_train = pd.read_csv("x_mul_train.csv")
-label_train = pd.read_csv("y_mul_train.csv")
-df_train['label'] = label_train
 
-df_test = pd.read_csv("x_mul_test.csv")
-label_test = pd.read_csv("y_mul_test.csv")
-df_test['label'] = label_test
+# Load your dataset
+data_folder = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/processed_data/new_try'
+df_train, df_test = utils.load_dataset(data_folder)
 
 # Setting initial parameters, akin to model.compile for keras models
-num_local_round = 1
 params = {
     "objective": "multi:softprob",
     'num_class': 9,
-    "eta": 0.1,
-    "max_depth": 8,
-    "eval_metric": "aucpr",
-    "nthread": 16,
-    "num_paralell_tree": 1,
+    "eta": 0.05,
+    "max_depth": 4,
+    "min_child_weight": 1,
+    "gamma": 0.05   ,
     "subsample": 1,
-    "tree_method": "hist",
+    "colsample_bytree": 1,
+    "lambda": 1,
 }
 
 class SimpleClient(Client):
-    def __init__(self, train, test,num_train,num_test,num_local_round,params):
-        self.model = None
+    def __init__(self, train, test, len_train,len_test,num_local_round,params):
+        self.first = None
         self.config = None
+        self.model = None
         self.train = train
         self.test = test
-        self.num_train = num_train
-        self.num_test = num_test
+        self.len_train = len_train
+        self.len_test = len_test
         self.num_local_round = num_local_round
         self.params = params
 
@@ -55,25 +49,43 @@ class SimpleClient(Client):
                                 parameters=Parameters(tensor_type="",tensors=[])
                                 )
     
+    def _local_boost(self, model_input):
+        # Update trees based on local training data.
+        for i in range(self.num_local_round):
+            model_input.update(self.train, model_input.num_boosted_rounds())
+
+        # Bagging: extract the last N=num_local_round trees for sever aggregation
+        output_model = model_input[
+            model_input.num_boosted_rounds()
+            - self.num_local_round : model_input.num_boosted_rounds()
+        ]
+        self.num_local_round += 1
+
+        return output_model
+    
     def fit(self, ins: fl.common.FitIns) -> fl.common.FitRes:
-        if not self.model:
+        if not self.first:
             #first round
-            model = xgb.train(params, 
+            self.first = True
+            model = xgb.train(     self.params, 
                                    self.train,
-                                   num_boost_round=num_local_round,
+                                   num_boost_round=self.num_local_round,
                                    evals=[(self.test, "test"), (self.train, "train")],)
             self.config = model.save_config()
-            self.model = model
+            # self.model = model
         else:
-            for item in ins.parameters.tensors:
-                global_model = bytearray(item)
+            model = xgb.Booster(params=self.params)
+            global_model = bytearray(ins.parameters.tensors[0])
+
+            #load the global model
+            model.load_model(global_model)
+            model.load_config(self.config)
             
-            self.model.load_model(global_model)
-            self.model.load_config(self.config)
-            
-            model = self._local_boost()
+            #local training
+            model = self._local_boost(model)
         
-        local_model = self.model.save_raw("json")
+        #save model
+        local_model = model.save_raw("json")
         local_model_bytes = bytes(local_model)
 
         return FitRes(
@@ -85,35 +97,28 @@ class SimpleClient(Client):
                     tensor_type="",
                     tensors=[local_model_bytes],
                 ),
-                num_examples=self.num_train,
+                num_examples=self.len_train,
                 metrics={},
         )
-
-    def _local_boost(self):
-        # Update trees based on local training data.
-        for i in range(self.num_local_round):
-            self.model.update(self.train, self.model.num_boosted_rounds())
-
-        # Bagging: extract the last N=num_local_round trees for sever aggregation
-        model = self.model[
-            self.model.num_boosted_rounds()
-            - self.num_local_round : self.model.num_boosted_rounds()
-        ]
-
-        return model
     
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
+        # Load global model
+        model = xgb.Booster(params=self.params)
+        para_b = bytearray(ins.parameters.tensors[0])
+        model.load_model(para_b)
+
         # Run evaluation
-        eval_results = self.model.eval_set(
+        eval_results = model.eval_set(
             evals=[(self.test, "test")],
-            iteration=self.model.num_boosted_rounds() - 1,
+            iteration=model.num_boosted_rounds() - 1,
         )
+
         auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
-        loss = log_loss(self.test.get_label(), self.model.predict(self.test))
-        #convert probabilities to binary
-        
-        predictions = self.model.predict(self.test)
-        predictions = np.argmax(predictions, axis=1)
+       
+        predictions = model.predict(self.test)
+        loss = log_loss(self.test.get_label(), predictions)
+        #convert probabilities to classes
+        predictions = np.argmax(predictions, axis=1)        
         accuracy = accuracy_score(self.test.get_label(), predictions)
         
         return EvaluateRes(
@@ -122,7 +127,7 @@ class SimpleClient(Client):
                 message="OK",
             ),
             loss=loss,
-            num_examples=self.num_test,
+            num_examples=self.len_test,
             metrics={"Loss": loss,
                      "AUC": auc,
                      "Accuracy": accuracy},
@@ -132,9 +137,10 @@ class SimpleClient(Client):
 
 def create_client(cid: str):
     #get train and test data
-    train, num_train = utils.load_data(train_partitions[int(cid)-1])
-    test, num_test = utils.load_data(test_partitions[int(cid)-1])
-    return SimpleClient(train, test, num_train, num_test, num_local_round, params)
+    train, len_train = utils.load_data(train_partitions[int(cid)-1])
+    test, len_test = utils.load_data(test_partitions[int(cid)-1])
+    num_local_round = 1
+    return SimpleClient(train, test, len_train, len_test, num_local_round, params)
 
 
 if __name__ == "__main__":

@@ -19,11 +19,8 @@ warnings.filterwarnings("ignore")
 data_folder = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/processed_data/new_try'
 df_train, df_test = utils.load_dataset(data_folder)
 
-
-
 # Setting initial parameters, akin to model.compile for keras models
 #set parameters to prevent overfitting
-
 params = {
     "objective": "binary:logistic",
     "eta": 0.05,
@@ -34,7 +31,6 @@ params = {
     "colsample_bytree": 1,
     "lambda": 1,
 }
-
 
 class SimpleClient(Client):
     def __init__(self, train, test,len_train,len_test,num_local_round,params):
@@ -56,7 +52,7 @@ class SimpleClient(Client):
     def _local_boost(self, model_input):
         # Update trees based on local training data.
         for i in range(self.num_local_round):
-            model_input.update(self.train, model_input.num_boosted_rounds())
+            self.model.update(self.train, self.model.num_boosted_rounds())
         
         # Bagging: extract the last N=num_local_round trees for sever aggregation
         output_model = model_input[
@@ -107,7 +103,6 @@ class SimpleClient(Client):
                 num_examples=self.len_train,
                 metrics={},
         )
-
     
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         # Load global model
@@ -124,8 +119,8 @@ class SimpleClient(Client):
         auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
         
         predictions = model.predict(self.test)
-        loss = log_loss(self.test.get_label(), predictions)
-        predictions = np.where(predictions > 0.5, 1, 0)        #convert probabilities to binary
+        loss = log_loss(self.test.get_label(), probabilities)
+        probabilities = np.where(predictions > 0.5, 1, 0)        #convert probabilities to binary
         accuracy = accuracy_score(self.test.get_label(), predictions)
         
         return EvaluateRes(

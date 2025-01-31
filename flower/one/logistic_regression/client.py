@@ -28,26 +28,18 @@ class SimpleClient(fl.client.NumPyClient):
         return utils.get_model_parameters(self.model)
     
     def set_parameters(self, parameters):
-       return utils.set_model_params(self.model, parameters)
+        return utils.set_model_params(self.model, parameters)
 
-    def fit(self, parameters, config):
-        # print(f"Client {args.id} model parameters: {self.get_parameters(config)}")
-        # print(f"Client {args.id} received parameters: {parameters}")
-        # print(f"Client {args.id} updated parameters {self.get_parameters(config)}")
-        # print(f"Client {args.id} fitted model parameters {self.get_parameters(config)}")
-       
+    def fit(self, parameters, config): 
         self.model = self.set_parameters(parameters)
         self.model.fit(self.X_train, self.y_train)
-            
         return utils.get_model_parameters(self.model), len(self.X_train), {}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
-        # print(f"parameters for client {args.id}: {parameters}")
-
         loss = log_loss(self.y_test, self.model.predict_proba(self.X_test))
         accuracy = self.model.score(self.X_test, self.y_test)
-        print(f"Client accuracy for client {args.id}: {accuracy} ")
+        print(f"Client loss and accuracy for client {args.id}:{loss} {accuracy} ")
         return loss, len(self.X_test), {"loss": loss, "accuracy": accuracy}
 
 

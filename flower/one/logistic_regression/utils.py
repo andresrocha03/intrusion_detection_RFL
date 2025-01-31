@@ -12,7 +12,7 @@ NUM_UNIQUE_LABELS = 2  # Number of unique labels in your dataset
 NUM_FEATURES = 15  # Number of features in your dataset
 
 
-def load_dataset(    data_folder: string) -> Tuple[NDArray, NDArray, NDArray, NDArray]:  
+def load_dataset(data_folder: string) -> Tuple[NDArray, NDArray, NDArray, NDArray]:  
     """
     Load dataset.
 
