@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 
 # Define metrics and models
 metrics = ["Loss", "Accuracy"]
-models = ["log_reg", "xgb", "mlp"]
-colors = ['red', 'blue', 'green']
-labels = ['Logistic Regression', 'XGBoost', 'MLP']
+models = ["log_reg", "xgb", "mlp", "dqn"]
+colors = ['red', 'blue', 'green', 'black']
+labels = ['Logistic Regression', 'XGBoost', 'MLP', 'DQN']
 
 # Load central results
 central_results = pd.read_csv("central_res.csv")

@@ -10,9 +10,5 @@ if os.path.exists(results_file):
 else:
     results_df = pd.DataFrame(columns=['Model Name', 'Loss', 'Accuracy'])
 
-
-
-
-
 # Save the DataFrame to a CSV file
 results_df.to_csv(results_file, index=False)

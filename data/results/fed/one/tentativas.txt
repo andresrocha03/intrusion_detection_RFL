@@ -1,0 +1,27 @@
+dqn, 0.6 do dataset, 5 clientes, 100 rodadas, 20 rows per episode
+deu ruim
+dqn, 0.5 do dataset, 5 clientes, 100 rodadas, 100 rows per episode
+overfit
+dqn, 100% do dataset, 5 clientes, 50 rodadas, 100 rows per episode
+overfit
+dqn, 100% do dataset, 5 clientes, 50 rodadas, 100 rows per episode, lr = 0.00005
+overfit
+dqn, 50% do dataset, 5 clientes, 10 rodadas, 100 rows per episode
+se rodar varias vezes, em algum momento da bom
+dqn, 50% do dataset, 5 clientes, 10 rodadas, 20 rows per episode
+ficou ruim
+dqn, 50% do dataset, 5 clientes, 20 rodadas, 100 rows per episode, ttarget update interval = 5000, indice 12
+dqn, 50% do dataset, 5 clientes, 20 rodadas, 100 rows per episode, ttarget update interval = 5000, indice 27
+dqn, 50% do dataset, 5 clientes, 20 rodadas, 100 rows per episode, ttarget update interval = 15000, indice 47
+deu ruim
+dqn, 100% do dataset, 5 clientes, 20 rodadas, 100 rows per episode, ttarget update interval = 15000, indice 87
+dqn, 100% do dataset, 5 clientes, 20 rodadas, 100 rows per episode, lr = 1e-5 indice 11 - 110
+fica bom mas da pra tentar aumentar o recall
+dqn, 100% do dataset, 5 clientes, 20 rodadas, 100 rows per episode, lr = 1e-5, recompensa -1.5, indice 112-211
+dqn, 100% do dataset, 5 clientes, 20 rodadas, 100 rows per episode, lr = 1e-5, recompensa -5.0, indice 212
+ruimm
+dqn, 100% do dataset, 5 clientes, 20 rodadas, 100 rows per episode, lr = 1e-5, recompensa -2.5, indice 312
+dqn, 100% do dataset, 5 clientes, 20 rodadas, 100 rows per episode, lr = 1e-5, recompensa -2, indice 3124
+
+
+
