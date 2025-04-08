@@ -6,20 +6,8 @@ import numpy as np
 import random
 import pandas as pd
 
-
-
 columns = 15
 num_actions = 2
-# data_folder = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/processed_data/current_testing/'
-# path_x = 'x_mul_test.csv'
-# path_y = 'y_mul_test.csv'
-# train_x = pd.read_csv(os.path.join(data_folder,path_x))
-# train_y = pd.read_csv(os.path.join(data_folder,path_y))
-# df_train_x = np.array(train_x).astype(np.float32)
-# df_train_y = np.array(train_y).astype(np.float32)
-# df_train_x = np.expand_dims(df_train_x, 1)
-# df_train_y = np.expand_dims(df_train_y, 1)
-
 
 class TabularEnv(gym.Env):
     """
@@ -45,7 +33,7 @@ class TabularEnv(gym.Env):
     - expected_action (int): Expected action based on the current observation.
     """
 
-    def __init__(self,  df_train_x, df_train_y, row_per_episode=1, random=False):
+    def __init__(self,  df_train_x, df_train_y, row_per_episode=100, random=False):
         super().__init__()
 
         # Define action space
@@ -67,38 +55,46 @@ class TabularEnv(gym.Env):
         self.random = random
         self.current_obs = None
         self.dataset_idx = 0
-        self.count = 0
+        self.acc_count = 0
+        self.total_rwd = 0
         self.terminated = False
+        self.info = {}
 
     def precision_recall(self, action):
-            # print(f"expected: {self.expected_action} and got action: {action}")
-            # print(f"matriz: {self.confusion_matrix[self.expected_action][action]}")
+            # update confusion matrix
             self.confusion_matrix[self.expected_action][action] += 1
-            # print(f"matriz: {self.confusion_matrix[self.expected_action][action]}")
+
+            # initialize precision and recall
             precision, recall = 0,0
-            if (num_actions == 2):
-                tp = self.confusion_matrix[1][1]
-                fp = self.confusion_matrix[0][1]
-                fn = self.confusion_matrix[1][0]
-                # print(f"tp: {tp}   fp:{fp}   fn:{fn}")
-                if ((tp + fp) == 0) or (tp+fn == 0):
+
+            # check for binary or multi-class classification
+            if (num_actions == 2): #binary classification
+                tp = self.confusion_matrix[1][1] #true-positives
+                fp = self.confusion_matrix[0][1] #false-positives
+                fn = self.confusion_matrix[1][0] #false-negatives
+                
+                if ((tp + fp) == 0) or (tp+fn == 0): #check for division by zero
                     return precision, recall
-                else:
+                else: #calculate precision and recall
                     precision = float(tp) / float((tp + fp))
                     recall = float(tp) / float((tp + fn))
                     return precision, recall
-            else: 
-                precision_list = np.zeros((1,num_actions))
+            
+            else: #multi-class classification
+                # initialize precision list for each class
+                precision_list = np.zeros((1,num_actions)) 
                 recall_list    = np.zeros((1,num_actions))
+
                 for i in range(num_actions):
                     tp = self.confusion_matrix[i][i]
                     fp = np.sum(self.confusion_matrix.T[i]) - tp
                     fn = np.sum(self.confusion_matrix[i]) - tp
-                    if ((tp + fp) == 0) or (tp+fn == 0):
+                    if ((tp + fp) == 0) or (tp+fn == 0): #check for division by zero
                         continue
-                    else:
-                        precision_list[0][i] = float(tp) / float((tp + fp)) 
-                        recall_list[0][i]    = float(tp) / float((tp + fn))
+                    else:  
+                        precision_list[0][i] = float(tp) / float((tp + fp)) #calculate precision for class i 
+                        recall_list[0][i]    = float(tp) / float((tp + fn)) #calculate recall for class i
+                #use average precision and recall
                 precision = np.average(precision_list)
                 recall = np.average(recall_list)
             return precision, recall
@@ -117,26 +113,41 @@ class TabularEnv(gym.Env):
         - info (dict): Additional information.
         """
 
-        if (int(action == self.expected_action)):
-            reward = 1
-        else:
-            reward = -1
-
-        precision, recall = self.precision_recall(action) 
-
-        self.count += 1
-            
-        obs = self._next_obs()
-
         self.step_count += 1
-        if self.step_count >= len(self.x):
-            self.terminated = True
-        
-        precision, recall = self.precision_recall(action)
-        info = {"precision": precision, "recall": recall, "terminated": self.terminated}
-        
         self.truncated = False
-        return obs, reward, self.terminated, self.truncated, info
+        self.terminated = False
+
+        reward = 0
+        if (int(action) == 0 and self.expected_action==0):
+            reward = 3
+            self.total_rwd += 1
+        elif (int(action) == 1 and self.expected_action==1):
+            reward = 10
+            self.total_rwd += 1
+        elif (int(action)==0 and self.expected_action==1):
+            reward = -10
+        elif (int(action)==1 and self.expected_action==0):
+            reward = -3
+
+
+        precision, recall = self.precision_recall(action)
+        # precision = 0
+        # recall = 0
+
+        self.acc_count += 1
+        accuracy = self.total_rwd / self.acc_count
+      
+        self.info = {"step": self.acc_count, "idx": self.dataset_idx, "accuracy": accuracy, "precision": precision, "recall": recall, "terminated": self.terminated}
+        # print(self.info)
+
+      
+        obs = self.x[self.dataset_idx]
+        if self.step_count >= self.row_per_episode:
+            self.terminated = True
+        else:
+            obs = self._next_obs()
+        
+        return obs, reward, self.terminated, self.truncated, self.info
 
     def reset(self, seed=None, options=None):
         """
@@ -146,14 +157,16 @@ class TabularEnv(gym.Env):
         - obs (numpy array): The initial observation.
         """
 
+        # print(f"reset called, reached instance count {self.acc_count}")
         self.step_count = 0
-        if seed is not None:
+    
+        if seed==0:
             obs = self.x[seed]
-        else:
-            obs = self.x[self.dataset_idx]
-        self.expected_action = int(self.y[self.dataset_idx])
-        info = {}
-        return obs, info
+            self.expected_action = int(self.y[seed])
+            return obs, self.info
+        
+        obs = self._next_obs()
+        return obs, self.info
 
     def _next_obs(self):
         """
@@ -172,7 +185,7 @@ class TabularEnv(gym.Env):
             self.dataset_idx += 1
             if self.dataset_idx >= len(self.x):
                 self.dataset_idx = 0
-                self.terminated = True
+                # self.terminated = True
             
             obs = self.x[self.dataset_idx]
             self.expected_action = int(self.y[self.dataset_idx])
