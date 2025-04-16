@@ -8,5 +8,5 @@ In this folder, there are the codes responsible for training, testing, and evalu
 ## pre_processing
 In this folder, there is the code responsible for the pre_processing
 
-## planning 
-In this folder, there is some notes about what I need to do in my next steps.
+## environments 
+In this folder, it is possible to find the environments created for the reinforcement learning 
