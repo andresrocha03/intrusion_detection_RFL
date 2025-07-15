@@ -2,6 +2,8 @@
 
 ## [Paper](https://sol.sbc.org.br/index.php/sbrc_estendido/article/view/35889/35676)
 
+## [dataset](https://www.unb.ca/cic/datasets/ids-2017.html)
+
 ## centralized
 In this folder, there are the codes responsible for training, testing, and evaluating the centralized models.
 
