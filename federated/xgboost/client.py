@@ -22,14 +22,26 @@ df_surprise = utils.load_surprise_dataset(data_folder)
 surprise, len_sur = utils.load_data(df_surprise)
 
 
-# Setting initial parameters, akin to model.compile for keras models
 #set parameters to prevent overfitting
+# binary classification
+# params = {
+#     "objective": "binary:logistic",
+#     "eta": 0.05,
+#     "max_depth": 2,
+#     "min_child_weight": 1,
+#     "gamma": 0.05   ,
+#     "subsample": 1,
+#     "colsample_bytree": 1,
+#     "lambda": 1,
+# }
+# multi-class classification
 params = {
-    "objective": "binary:logistic",
+    "objective": "multi:softprob",
+    "num_class": 9,
     "eta": 0.05,
     "max_depth": 2,
     "min_child_weight": 1,
-    "gamma": 0.05   ,
+    "gamma": 0.05,
     "subsample": 1,
     "colsample_bytree": 1,
     "lambda": 1,
@@ -113,9 +125,9 @@ class SimpleClient(Client):
         para_b = bytearray(ins.parameters.tensors[0])
         model.load_model(para_b)
         
-        if self.num_local_round == 101:
-            self.test = surprise
-            print("Testing on surprise dataset") 
+        # if self.num_local_round == 101:
+        #     self.test = surprise
+        #     print("Testing on surprise dataset") 
 
         # Run evaluation
         eval_results = model.eval_set(
@@ -127,11 +139,12 @@ class SimpleClient(Client):
      
 
         probabilities = model.predict(self.test)
-        predictions = np.where(probabilities > 0.5, 1, 0)        #convert probabilities to binary
+        # predictions = np.where(probabilities > 0.5, 1, 0)        #convert probabilities to binary
+        predictions = np.argmax(probabilities, axis=1)              #for multi-class classification
         loss = log_loss(self.test.get_label(), probabilities)
         accuracy = accuracy_score(self.test.get_label(), predictions)
-        precision = precision_score(self.test.get_label(), predictions)
-        recall = recall_score(self.test.get_label(), predictions)
+        precision = precision_score(self.test.get_label(), predictions, average='macro')
+        recall = recall_score(self.test.get_label(), predictions, average='macro')
 
         return EvaluateRes(
             status=Status(

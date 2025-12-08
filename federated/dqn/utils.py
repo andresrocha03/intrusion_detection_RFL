@@ -25,13 +25,13 @@ def load_dataset(data_folder: string) -> Tuple[NDArray, NDArray, NDArray, NDArra
     - df_test: pd.DataFrame
         Test dataset.
     """
-    X_train = pd.read_csv(os.path.join(data_folder, "x_one_train.csv" ))
-    y_train = pd.read_csv(os.path.join(data_folder, "y_one_train.csv"))
+    X_train = pd.read_csv(os.path.join(data_folder, "x_mul_train.csv" ))
+    y_train = pd.read_csv(os.path.join(data_folder, "y_mul_train.csv"))
     X_train['label'] = y_train
     df_train = X_train
 
-    X_test = pd.read_csv(os.path.join(data_folder, "x_one_test.csv"))
-    y_test = pd.read_csv(os.path.join(data_folder, "y_one_test.csv"))
+    X_test = pd.read_csv(os.path.join(data_folder, "x_mul_test.csv"))
+    y_test = pd.read_csv(os.path.join(data_folder, "y_mul_test.csv"))
     X_test['label'] = y_test
     df_test = X_test
 

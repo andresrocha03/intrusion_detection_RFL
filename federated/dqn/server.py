@@ -21,7 +21,7 @@ def fit_round(server_round: int) -> Dict:
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     # Multiply accuracy of each client by number of examples used
-    results_directory = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/results/fed/one' 
+    results_directory = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/results/fed/mul' 
     results_file = os.path.join(results_directory, 'dqn_res.csv')
     results = pd.read_csv(results_file)
     

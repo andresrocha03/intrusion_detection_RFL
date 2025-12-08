@@ -7,7 +7,7 @@ import random
 import pandas as pd
 
 columns = 15
-num_actions = 2
+num_actions = 9
 
 class TabularEnv(gym.Env):
     """

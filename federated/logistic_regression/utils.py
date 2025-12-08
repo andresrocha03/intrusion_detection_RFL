@@ -8,7 +8,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_validate, train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, log_loss
 
-NUM_UNIQUE_LABELS = 2  # Number of unique labels in your dataset
+NUM_UNIQUE_LABELS = 9  # Number of unique labels in your dataset
 NUM_FEATURES = 15  # Number of features in your dataset
 
 
@@ -47,13 +47,13 @@ def load_dataset(data_folder: string) -> Tuple[NDArray, NDArray, NDArray, NDArra
     - df_test: pd.DataFrame
         Test dataset.
     """
-    X_train = pd.read_csv(os.path.join(data_folder, "x_one_train.csv" ))
-    y_train = pd.read_csv(os.path.join(data_folder, "y_one_train.csv"))
+    X_train = pd.read_csv(os.path.join(data_folder, "x_mul_train.csv" ))
+    y_train = pd.read_csv(os.path.join(data_folder, "y_mul_train.csv"))
     X_train['label'] = y_train
     df_train = X_train
 
-    X_test = pd.read_csv(os.path.join(data_folder, "x_one_test.csv"))
-    y_test = pd.read_csv(os.path.join(data_folder, "y_one_test.csv"))
+    X_test = pd.read_csv(os.path.join(data_folder, "x_mul_test.csv"))
+    y_test = pd.read_csv(os.path.join(data_folder, "y_mul_test.csv"))
     X_test['label'] = y_test
     df_test = X_test
 
@@ -122,8 +122,8 @@ def get_scores(y_true: NDArray, y_prob: NDArray) -> dict:
     score = {
         "loss": log_loss(y_true, y_prob),
         "accuracy": accuracy_score(y_true, y_pred),
-        "precision": precision_score(y_true, y_pred, average="binary"),
-        "recall": recall_score(y_true, y_pred, average="binary"),
+        "precision": precision_score(y_true, y_pred, average="macro"),
+        "recall": recall_score(y_true, y_pred, average="macro"),
     }
     return score
 

@@ -67,8 +67,8 @@ class SimpleClient(NumPyClient):
             print("Testing on surprise dataset")
 
         y_pred = self.model.predict(self.x_test)
-        scores = utils.get_scores(self.y_test, y_pred)
-        print(type(scores['loss']))
+        scores = utils.get_multiclasses_scores(self.y_test, y_pred)
+        # print(type(scores['loss']))
         return scores['loss'], len(self.x_test), scores
 
 

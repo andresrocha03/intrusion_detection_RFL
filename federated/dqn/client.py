@@ -57,7 +57,7 @@ class SimpleClient(NumPyClient):
         """Train the model with data of this client."""
 
         utils.set_weights(self.model_train, parameters)
-        logdir = f"{self.model_name}_final_verdade"
+        logdir = f"{self.model_name}_multiclass"
         self.model_train.learn(total_timesteps=self.data_fraction, reset_num_timesteps=False, progress_bar=True, tb_log_name=logdir)        
         self.round += 1
         return utils.get_weights(self.model_train), self.data_fraction , {}
@@ -87,24 +87,24 @@ class SimpleClient(NumPyClient):
 
         for i in range(self.y_test.shape[0]):
             action, _states = self.model_test.predict(obs)
-            #extract q values
-            probabilities = self.model_test.q_net.q_values_aux
+            # #extract q values
+            # probabilities = self.model_test.q_net.q_values_aux
             
-            #transform tensor to numpy
-            probabilities = probabilities.detach().numpy()
+            # #transform tensor to numpy
+            # probabilities = probabilities.detach().numpy()
 
-            #normalize q values
-            probabilities = probabilities / np.max(probabilities)
+            # #normalize q values
+            # probabilities = probabilities / np.max(probabilities)
             
-            #calculate the probability of each action
-            # print(probabilities)
-            probabilities = softmax(probabilities)
-            # print(probabilities)
-            #reshape for 1D
-            probabilities = probabilities.reshape(-1)
+            # #calculate the probability of each action
+            # # print(probabilities)
+            # probabilities = softmax(probabilities)
+            # # print(probabilities)
+            # #reshape for 1D
+            # probabilities = probabilities.reshape(-1)
             
             predictions.append(action)
-            prob_predictions.append(probabilities)
+            # prob_predictions.append(probabilities)
 
             obs, rewards, terminated, truncated, info = self.env_test.step(action)
             if terminated:
@@ -113,7 +113,8 @@ class SimpleClient(NumPyClient):
         
         
         # prob_predictions = utils.sigmoid(np.asarray(predictions))
-        loss = log_loss(self.y_test, prob_predictions)
+        # loss = log_loss(self.y_test, prob_predictions)
+        loss = log_loss(self.y_test, np.zeros((self.y_test.shape[0], 9)) + 1e-15)
         accuracy = (predictions == self.y_test ).mean()
         print(f"TESTING loss and accuracy for client {self.client_id}: {loss} and {accuracy}\n, round {self.round}")
 

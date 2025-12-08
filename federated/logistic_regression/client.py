@@ -23,6 +23,7 @@ class SimpleClient(fl.client.NumPyClient):
         y_train = y_train[:int(len(y_train)*0.4)]
         self.X_train, self.y_train = X_train, y_train
         self.X_test, self.y_test = X_test, y_test
+        #binary classification
         self.model = LogisticRegression(penalty='l1',warm_start=True, solver="saga", max_iter=1)
         self.round = 0
         # Setting initial parameters, akin to model.compile for keras models

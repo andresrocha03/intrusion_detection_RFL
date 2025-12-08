@@ -44,7 +44,7 @@ def get_evaluate_fn(model: LogisticRegression, num_clients:int, test_split=0.2, 
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     # Multiply accuracy of each client by number of examples used
-    results_directory = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/results/fed/one' 
+    results_directory = '/home/andre/unicamp/ini_cien/intrusion_detection_RFL/data/results/fed/mul' 
     results_file = os.path.join(results_directory, 'log_reg_res.csv')
     results = pd.read_csv(results_file)
     
