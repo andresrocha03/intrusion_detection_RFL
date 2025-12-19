@@ -1,0 +1,36 @@
+
+# Cleanup playbook (run when you want to erase everything on the Pis):
+- name: Cleanup federated learning setup on Raspberry Pis
+  hosts: raspberrypis
+  become: yes
+  tasks:
+    - name: Stop and disable federated client service
+      systemd:
+        name: fed_client.service
+        state: stopped
+        enabled: no
+
+    - name: Remove systemd unit file
+      file:
+        path: /etc/systemd/system/fed_client.service
+        state: absent
+
+    - name: Remove project directory and data
+      file:
+        path: "{{ project_src }}"
+        state: absent
+
+    - name: Remove virtual environment directory
+      file:
+        path: "{{ venv_path }}"
+        state: absent
+
+    - name: Optionally remove python3-venv and pip
+      apt:
+        name:
+          - python3-venv
+          - python3-pip
+        state: absent
+        autoremove: yes
+# To cleanup:
+#  ansible-playbook -i inventory.yml federated_venv_playbook.yml --tags cleanup

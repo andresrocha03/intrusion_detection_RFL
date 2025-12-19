@@ -1,0 +1,23 @@
+all:
+  children:
+    raspberrypis:
+      hosts:
+        pi0:
+          ansible_host: 
+          ansible_user: pi
+        pi1:
+          ansible_host: 
+          ansible_user: pi
+        pi2:
+          ansible_host: 
+          ansible_user: pi
+        pi3:
+          ansible_host: 
+          ansible_user: pi
+        pi4:
+          ansible_host: 
+          ansible_user: pi
+    server:
+      hosts:
+        localhost:
+          ansible_connection: local

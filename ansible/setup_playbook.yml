@@ -1,0 +1,95 @@
+- name: Prepare server environment for results
+  hosts: server
+  become: false
+  vars:
+    results_dir: /home/andre/anstart/dados
+  tasks:
+    - name: Ensure results directory exists
+      file:
+        path: "{{ results_dir }}"
+        state: directory
+        mode: '0755'
+    
+- name: Setup federated learning clients on Raspberry Pis
+  hosts: raspberrypis
+  become: yes
+  vars:
+    venv_path: /home/pi/fed_venv
+    project_src: /home/pi/fed_project
+    data_src: /home/andre/anstart/dados  
+    code_src: /home/andre/anstart/dqn
+    env_src: /home/andre/anstart/dqn/environments
+    num_clients: "{{ groups['raspberrypis'] | length }}"
+    client_id: "{{ inventory_hostname | regex_replace('pi', '') }}"
+    num_rounds: 10  
+  tasks:
+    - name: Ensure python3-venv and pip are installed
+      apt:
+        name:
+          - python3-venv
+          - python3-pip
+        state: present
+        update_cache: yes
+
+    - name: Create project directory
+      file:
+        path: "{{ project_src }}"
+        state: directory
+        owner: pi
+        group: pi
+        mode: '0755'
+
+    - name: Copy requirements.txt to Pi
+      copy:
+        src: requirements.txt
+        dest: "{{ project_src }}/requirements.txt"
+        owner: pi
+        group: pi
+        mode: '0644'
+
+    - name: Copy client.py to Pi
+      copy:
+        src: "{{ code_src }}/client.py"
+        dest: "{{ project_src }}/client.py"
+        owner: pi
+        group: pi
+        mode: '0755'
+
+
+    - name: Copy utils.py to Pi
+      copy:
+        src: "{{ code_src }}/utils.py"
+        dest: "{{ project_src }}/utils.py"
+        owner: pi
+        group: pi
+        mode: '0755'
+
+    - name: Copy envs folder to Pi
+      synchronize:
+          src: "{{ env_src }}/"
+          dest: "{{ project_src }}/environments/"
+          recursive: yes
+      delegate_to: localhost
+      become: false
+
+    - name: Copy dataset folder to Pi
+      synchronize:
+        src: "{{ data_src }}/"
+        dest: "{{ project_src }}/data/"
+        recursive: yes
+      delegate_to: localhost
+      become: false
+
+    - name: Create virtual environment
+      command: python3 -m venv {{ venv_path }}
+      args:
+        creates: "{{ venv_path }}/bin/activate"
+
+
+    - name: Install requirements in virtualenv
+      pip:
+        requirements: "{{ project_src }}/requirements.txt"
+        virtualenv: "{{ venv_path }}"
+
+# To execute setup:
+#  ansible-playbook -i inventory.yml setup_playbook.yml

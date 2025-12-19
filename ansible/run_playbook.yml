@@ -1,0 +1,45 @@
+- name: Prepare server environment for results
+  hosts: server
+  become: false
+  vars:
+    results_file: /home/andre/anstart/dados/dqn_res.csv
+    results_dir: /home/andre/anstart/dados
+  tasks:
+    - name: Ensure results directory exists
+      file:
+        path: "{{ results_dir }}"
+        state: directory
+        mode: '0755'
+    - name: Ensure results file exists
+      copy:
+        dest: "{{ results_file }}"
+        content: "Model Name,Loss,Accuracy,Precision,Recall\n"
+        force: no
+
+- name: Run federated learning experiment with 5 clients on Raspberry Pis
+  hosts: raspberrypis
+  become: yes
+  vars:
+    venv_path: /home/pi/fed_venv
+    project_src: /home/pi/fed_project
+    data_src: /home/andre/anstart/dados  
+    num_clients: "{{ groups['raspberrypis'] | length }}"
+    client_id: "{{ inventory_hostname | regex_replace('pi', '') }}"
+    num_rounds: 10  
+  tasks:
+    - name: Run client script with arguments
+      shell: |
+        {{ venv_path }}/bin/python {{ project_src }}/client.py \
+          --id {{ client_id }} \
+          --num_clients {{ num_clients }} \
+          --num_rounds {{ num_rounds }} \
+      args:
+        chdir: "{{ project_src }}"
+      async: 0
+      poll: 0
+      environment:
+        PYTHONUNBUFFERED: '1'
+
+
+# To execute experiment:
+#  ansible-playbook -i inventory.yml run_playbook.yml
